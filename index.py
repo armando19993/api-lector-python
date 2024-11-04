@@ -85,19 +85,17 @@ def extraer_contenido_selector(html, document_key, session):
         datos_factura = {}
 
         if datos_factura_texto:
-            # Usar la primera línea como tipo de documento
-            lineas_datos_factura = datos_factura_texto.split('\n')
-            if lineas_datos_factura:
-                datos_factura['tipo_documento'] = lineas_datos_factura[0].strip()  # Primera línea como tipo de documento
-
-            # Usar expresiones regulares para extraer los valores
+            # Usar expresiones regulares para extraer el tipo de documento, folio, fecha, y serie
+            tipo_documento_match = re.search(r'^(.*?)(?:Folio:|Serie:)', datos_factura_texto)  # Captura todo antes de "Folio:" o "Serie:"
             folio_match = re.search(r'Folio:\s*(\d+)', datos_factura_texto)
-            # Modificar la expresión regular para la fecha
             fecha_match = re.search(r'Fecha.*?:\s*(\d{2}-\d{2}-\d{4})', datos_factura_texto)
-            serie_match = re.search(r'Serie:\s*(\w+)', datos_factura_texto)
+            serie_match = re.search(r'Serie:\s*(.*?)\s*Folio:', datos_factura_texto)  # Captura solo entre "Serie:" y "Folio:"
+
+            if tipo_documento_match:
+                datos_factura['tipo_documento'] = tipo_documento_match.group(1).strip()  # Valor de tipo de documento
 
             if serie_match:
-                datos_factura['serie'] = serie_match.group(1).strip()  # Valor de Serie
+                datos_factura['serie'] = serie_match.group(1).strip()  # Valor de Serie entre "Serie:" y "Folio:"
 
             if folio_match:
                 datos_factura['folio'] = folio_match.group(1).strip()  # Valor de Folio
@@ -158,6 +156,7 @@ def extraer_contenido_selector(html, document_key, session):
         return {
             "error": "No se encontró el selector especificado en el HTML."
         }
+
 
 # Ruta principal de la API para procesar el DocumentKey
 @app.route('/process', methods=['GET'])
