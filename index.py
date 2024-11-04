@@ -51,7 +51,6 @@ def resolver_captcha():
             print("Error al resolver el CAPTCHA:", res.text)
             return None
 
-# Función para extraer todo el contenido en los selectores especificados
 def extraer_contenido_selector(html, document_key, session):
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -87,21 +86,16 @@ def extraer_contenido_selector(html, document_key, session):
 
         if datos_factura_texto:
             # Usar expresiones regulares para extraer los valores
-            serie_match = re.search(r'^(.*?)Serie:\s*(\w+)', datos_factura_texto)
             folio_match = re.search(r'Folio:\s*(\d+)', datos_factura_texto)
             # Modificar la expresión regular para la fecha
             fecha_match = re.search(r'Fecha.*?:\s*(\d{2}-\d{2}-\d{4})', datos_factura_texto)
+            serie_match = re.search(r'^(.*?)Serie:\s*(\w+)', datos_factura_texto)
 
             if serie_match:
                 datos_factura['tipo_documento'] = serie_match.group(1).strip()  # Texto antes de Serie:
                 datos_factura['serie'] = serie_match.group(2).strip()  # Valor de Serie
 
             if folio_match:
-                # Extraer la serie como lo que está antes de "Folio:"
-                folio_start_index = datos_factura_texto.find('Serie:') + len('Serie:') + 1
-                folio_end_index = datos_factura_texto.find('Folio:')
-                datos_factura['serie'] = datos_factura_texto[folio_start_index:folio_end_index].strip()  # Texto antes de Folio
-
                 datos_factura['folio'] = folio_match.group(1).strip()  # Valor de Folio
 
             if fecha_match:
