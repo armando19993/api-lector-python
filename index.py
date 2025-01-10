@@ -154,6 +154,7 @@ def extraer_contenido_selector(html, document_key, session):
         }
     else:
         return {
+            "informacion": contenedor,
             "error": "No se encontró el selector especificado en el HTML."
         }
 
