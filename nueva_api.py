@@ -22,7 +22,6 @@ def scrape_document(document_key):
 
         driver.implicitly_wait(3)
 
-        # Validar si la página cargó correctamente
         if "Error" in driver.title or not driver.find_elements(By.XPATH, "//body"): 
             raise ValueError("La página no cargó correctamente o no contiene información.")
 
@@ -80,13 +79,23 @@ def scrape_document(document_key):
         legitimo_tenedor_texto = legitimo_tenedor_elemento.text
         legitimo_tenedor = legitimo_tenedor_texto.split(": ")[1].strip()
 
-        tbody = driver.find_element(By.XPATH, "/html/body/div[3]/div/div/div[3]/div/div/div[2]/div/div[6]/div[2]/table/tbody")
-        rows = tbody.find_elements(By.TAG_NAME, "tr")
-        eventos = []
-        for row in rows:
-            codigo = row.find_element(By.XPATH, "./td[1]").text.strip()
-            descripcion = row.find_element(By.XPATH, "./td[2]").text.strip()
-            eventos.append({"codigo": codigo, "descripcion": descripcion})
+        try:
+            tbody = driver.find_element(By.XPATH, "/html/body/div[3]/div/div/div[3]/div/div/div[2]/div/div[6]/div[2]/table/tbody")
+            rows = tbody.find_elements(By.TAG_NAME, "tr")
+            eventos = []
+            for row in rows:
+                codigo = row.find_element(By.XPATH, "./td[1]").text.strip()
+                descripcion = row.find_element(By.XPATH, "./td[2]").text.strip()
+                eventos.append({"codigo": codigo, "descripcion": descripcion})
+        except Exception:
+            try:
+                alerta = driver.find_element(By.XPATH, "/html/body/div[3]/div/div/div[3]/div/div/div[2]/div/div[6]/div[2]/table/tbody/tr/td/div/div[contains(@class, 'alert panel-footer-grey')]")
+                if "No tiene eventos asociados" in alerta.text:
+                    eventos = []
+                else:
+                    raise
+            except Exception:
+                eventos = []
 
         result = {
             "datos_factura": {
