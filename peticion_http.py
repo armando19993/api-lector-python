@@ -20,7 +20,7 @@ def scrape_document(document_key):
 
     contenedor = soup.select_one("#html-gdoc > div:nth-child(3) > div > div:nth-child(2)")
     datos_factura_element = soup.select_one("#html-gdoc > div:nth-child(3) > div > div:nth-child(1) > div.col-md-4 > p")
-    legitimo_tenedor_element = soup.select_one("#home > div > div.container-fluid > div:nth-child(2) > div.col-md-4.row-fe-states > span")
+    legitimo_tenedor_element = soup.select_one("div.container-fluid > div.row > div.col-md-4.row-fe-states > span.cufe-text")
     pdf_link_element = datos_factura_element.select_one("a") if datos_factura_element else None
 
     # Nuevo elemento eventos
@@ -95,8 +95,9 @@ def scrape_document(document_key):
                 secciones[current_section]['Total'] = linea.split("Total:")[-1].strip()
 
         # Extraer el legítimo tenedor y eliminar "Legítimo Tenedor actual: "
-        legitimo_tenedor = legitimo_tenedor_element.get_text(strip=True) if legitimo_tenedor_element else None
-        if legitimo_tenedor:
+        legitimo_tenedor = None
+        if legitimo_tenedor_element:
+            legitimo_tenedor = legitimo_tenedor_element.get_text(strip=True)
             legitimo_tenedor = legitimo_tenedor.replace("Legítimo Tenedor actual: ", "").strip()
 
         # Descargar el PDF
